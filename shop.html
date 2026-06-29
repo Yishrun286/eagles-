@@ -907,7 +907,6 @@
           </div>
         </div>
       </div>
-      
 
      
 
@@ -1146,6 +1145,7 @@ function updatePrintingTotal(val) {
 }
 
 /* Order form submit */
+/* Order form submit */
 document.getElementById('order-form').addEventListener('submit', async function(e) {
   e.preventDefault();
   const btn = document.querySelector('.order-confirm-btn');
@@ -1197,13 +1197,117 @@ document.getElementById('order-form').addEventListener('submit', async function(
     return;
   }
 
+  // ══════════════════════════════════════════════
+  //  🚀 የቴሌግራም ቦት መልዕክት መላኪያ
+  // ══════════════════════════════════════════════
+  try {
+    const BOT_TOKEN = '8895167102:AAEhR42XtzJw9ud_tlv2z9AkB7Wlms4JEX0'; // 👈 የአንተን Bot Token እዚህ ተካ
+    const GROUP_ID = '-5382342621';   // 👈 የአንተን Group ID እዚህ ተካ (በ - መጀመር አለበት)
+
+    const tgMessage = `
+🛍️ **አዲስ የቲሸርት ማዘዣ ደርሷል!**
+───────────────────
+🆔 **የማዘዣ ቁጥር (Ref):** \`${order.ref}\`
+👕 **የኪቱ ዓይነት:** ${order.kit}
+👤 **የገዢው ስም:** ${order.name}
+📞 **ስልክ ቁጥር:** ${order.phone}
+📍 **የማድረሻ አድራሻ:** ${order.address}
+👥 **ገዢው ማን ነው:** ${order.buyer}
+✏️ **ፕሪንቲንግ (ስም ማተም):** ${order.printing === 'yes' ? `አዎ (${order.print_name})` : 'አያስፈልግም'}
+💰 **አጠቃላይ ክፍያ:** ${order.total}
+───────────────────
+`;
+
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: GROUP_ID,
+        text: tgMessage,
+        parse_mode: 'Markdown'
+      })
+    });
+  } catch (tgError) {
+    console.error('Telegram notification failed:', tgError);
+  }
+
   // ✅ SUCCESS
+  // ══════════════════════════════════════════════
+ // ══════════════════════════════════════════════
+  //  ✅ SUCCESS (የአድሚን ሊንክ እና የጽሑፍ ደረሰኝ የተካተተበት)
+  // ══════════════════════════════════════════════
   const formWrap = document.getElementById('order-form-wrap');
   const successDiv = document.getElementById('order-success');
 
   formWrap.style.cssText = 'display:none !important';
-  document.getElementById('order-ref-num').innerHTML = '<strong>Reference:</strong> ' + ref;
-  successDiv.style.cssText = 'display:block !important; text-align:center; padding:24px 0;';
+  
+  // ⚠️ እዚህ ላይ የራስህን ወይም የኮቹን ትክክለኛ የቴሌግራም ዩዘርኔም (ያለ @) ተካው!
+  const myTelegramUsername = 'yishrun_l'; 
+  const telegramDirectLink = `https://t.me/${myTelegramUsername}`;
+
+  // 1. ለአድሚኑ ስልኩን ሴቭ ሳያደርግ ቀጥታ Inbox ለመክፈት የሚረዳ ሊንክ ማዘጋጀት
+  const cleanPhone = order.phone.trim().replace(/^0/, ''); 
+  const adminDirectChatLink = `https://t.me/+251${cleanPhone}`;
+
+  // 2. ወደ ቴሌግራም ግሩፑ የሚላከውን መልዕክት ይበልጥ ፕሮፌሽናል ደረሰኝ (Text Invoice) እንዲመስል ማስተካከል
+  try {
+    const BOT_TOKEN = '8895167102:AAEhR42XtzJw9ud_tlv2z9AkB7Wlms4JEX0'; 
+    const GROUP_ID = '-5382342621';   
+
+    const tgMessage = `
+╔══════════════════════════════╗
+   🧾 **EAGLES FC - ኦፊሴላዊ ደረሰኝ**
+╚══════════════════════════════╝
+
+🆔 **የማዘዣ ቁጥር (Ref):** \`${order.ref}\`
+📅 **የታዘዘበት ቀን:** ${new Date().toLocaleDateString('en-GB')}
+
+👤 **የገዢው ስም:** ${order.name}
+👕 **የኪቱ ዓይነት:** ${order.kit}
+📞 **ስልክ ቁጥር:** [${order.phone}](${adminDirectChatLink}) 👈 *(ነክተው ቀጥታ Inbox ያውሩት)*
+📍 **የማድረሻ አድራሻ:** ${order.address}
+👥 **ገዢው ማን ነው:** ${order.buyer}
+✏️ **ፕሪንቲንግ (ስም ማተም):** ${order.printing === 'yes' ? `አዎ (${order.print_name})` : 'አያስፈልግም'}
+
+──────────────────────────────
+💰 **አጠቃላይ ክፍያ:** *${order.total}*
+──────────────────────────────
+✅ *የባንክ ክፍያ ስክሪንሹት እንደተላከ ትዕዛዙ ይጸድቃል!*
+`;
+
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: GROUP_ID,
+        text: tgMessage,
+        parse_mode: 'Markdown'
+      })
+    });
+  } catch (tgError) {
+    console.error('Telegram notification failed:', tgError);
+  }
+
+  // 3. ለተጠቃሚው/ለወላጆቹ ዌብሳይቱ ላይ የሚታየው መልዕክት
+  document.getElementById('order-ref-num').innerHTML = `
+    <div style="text-align:center; padding:10px 0; font-family: sans-serif;">
+      <p style="color:#2ecc71; font-size:1.3rem; font-weight:bold; margin-bottom:5px;">🎉 ትዕዛዝዎ በተሳካ ሁኔታ ተመዝግቧል!</p>
+      <p style="color:#555; line-height:1.5;">የመጨረሻ ደረጃ፦ እባክዎ የከፈሉበትን የሂሳብ ማረጋገጫ (Screenshot) ከታች ያለውን ቁልፍ ተጭነው የማዘዣ ቁጥርዎን በጥንቃቄ በመጥቀስ በቴሌግራም ይላኩልን።</p>
+      
+      <div style="background:#f9f9f9; border:1px dashed #ccc; padding:12px; border-radius:6px; display:inline-block; margin:10px 0;">
+        <span style="color:#333; font-weight:bold;">የአንተ ማዘዣ ቁጥር (Reference):</span><br>
+        <code style="font-size:1.2rem; color:#e74c3c; font-weight:bold;">${ref}</code>
+      </div>
+      
+      <br>
+      <a href="${telegramDirectLink}" target="_blank" 
+         style="display:inline-block; background:#0088cc; color:white; padding:12px 25px; border-radius:25px; text-decoration:none; font-weight:bold; margin-top:15px; box-shadow: 0 4px 6px rgba(0,136,204,0.2); transition: 0.3s;">
+         📩 ስክሪንሹት ለመላክ እዚህ ይጫኑ
+      </a>
+    </div>
+  `;
+  
+  successDiv.style.cssText = 'display:block !important;';
   document.getElementById('order-form').reset();
   btn.disabled = false;
   btn.textContent = '✅ Confirm Order';
